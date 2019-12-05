@@ -1,0 +1,22 @@
+from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('login',views.login, name='login'),
+    path('login_action',views.login_action, name='login_action'),
+    path('logout',views.logout, name='logout'),
+    path('search', views.search, name='search'),
+    path('search_camera', views.search_camera, name='search_camera'),
+    path('vehicle_details/<id>', views.vehicle_details, name='vehicle_details'),
+    path('camera_details', views.camera_details, name='camera_details'),
+    path('add_cam', views.add_cam, name='add_cam'),
+    path('add_cam_action', views.add_cam_action, name='add_cam_action'),
+    path('new_details', views.new_details , name='new_details'),
+    path('new_details_action', views.new_details_action , name='new_details_action'),
+]
+
+urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
