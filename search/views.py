@@ -3,10 +3,19 @@ from django.db.models import Q
 from django.contrib import messages
 from django.template import RequestContext
 from .models import *
+import cv2
+import socket
+import base64
+import threading
+from django.views.decorators import gzip
+from django.http import StreamingHttpResponse
+import os
+
 # Create your views here.
 global l_query,u_name_query, u_role_query
 
 l_query = New_location_db.objects.all()
+
 
 def login(request):
     return render(request, "login.html",{'u_name':request.session.get('u_name')})
@@ -151,4 +160,62 @@ def new_details_action(request):
         return render(request, 'index.html', {'u_role':request.session.get('role') ,'u_name':request.session.get('u_name')})
     else:
         return render(request,"login.html")
-        
+
+class VideoCamera(object):
+    def __init__(self):
+
+        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
+        print(1)
+        self.video = cv2.VideoCapture(0)
+        print(2)
+        (self.grabbed, self.frame) = self.video.read()
+        threading.Thread(target=self.update, args=()).start()
+
+    def __del__(self):
+        self.video.release()
+
+    def get_frame(self):
+        image = self.frame
+        ret, jpeg = cv2.imencode('.jpg', image)
+        return jpeg.tobytes()
+
+    def update(self):
+        while True:
+            (self.grabbed, self.frame) = self.video.read()
+
+
+
+def gen(camera):
+    while True:
+        frame = camera.get_frame()
+        yield(b'--frame\r\n'
+        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+
+global s
+
+@gzip.gzip_page
+def livefe(request):
+    try:
+        return StreamingHttpResponse(gen(VideoCamera()),content_type="multipart/x-mixed-replace;boundary=frame")
+    except HttpResponseServerError as e:
+        print("aborted")
+
+def stream(request):
+    s = socket.socket()
+    port = 1789
+    s.connect(('127.0.0.1', port))
+    msg="Hi".encode()
+    s.send(msg)
+    s.close()
+    return render(request,"stream.html")
+
+def stream_end(request):
+    s = socket.socket()
+    port = 1789
+    s.connect(('127.0.0.1', port))
+    print("Socket closed")
+    msg="Closing Connection".encode()
+    s.send(msg)
+    s.close()
+    return render(request,"index.html")

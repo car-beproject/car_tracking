@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% static "images" as baseUrl %}
 
 
@@ -16,18 +16,19 @@
     <div class="lower_body">
         
         <div class="header">
-                {% if u_name %}
-                <a href="/">Vehicle Tracking</a>
-                <a href="/camera_details">Camera Details</a>
-                {% if u_role == "Admin" %}
-                <a href="/add_cam">Add Camera</a>
-                {% endif %}
-                <a href="/logout" style="color: red;">Logout</a>
-                {% else %}
-                <a href="/login" style="color: black; width: 100%; text-align: center;"><b>System Login</b></a>
-                {% endif %}
+            {% if u_name %}
+            <a href="/">Vehicle Tracking</a>
+            <a href="/camera_details">Camera Details</a>
+            <a href="/stream">Camera Stream</a>
+            {% if u_role == "Admin" %}
+            <a href="/add_cam">Add Camera</a>
+            {% endif %}
+            <a href="/logout" style="color: red;">Logout</a>
+            {% else %}
+            <a href="/login" style="color: black; width: 100%; text-align: center;"><b>System Login</b></a>
+            {% endif %}
 
-            </div>
+        </div>
 
         
     {% block content %}
